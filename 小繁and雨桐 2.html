@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雨桐×小繁的年度甜蜜纪事</title>
+    <style>
+        /* 基本样式 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            width: 100%;
+        }
+
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            background-image: url('assets/images/background.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .welcome-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff69b4;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #ff85c1;
+        }
+
+        section {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            margin: 20px;
+            border-radius: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 时间轴样式 */
+        #timeline ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .timeline-item {
+            cursor: pointer;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .timeline-item:hover {
+            background: #e0e0e0;
+        }
+
+        /* 未来展望动画样式 */
+        #future-animation {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #ff69b4;
+            animation: fadeIn 2s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 心形动画样式 */
+        .heart {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            animation: floatUp 2s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-100px); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .welcome-content h1 {
+                font-size: 24px;
+            }
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+            section {
+                margin: 10px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 欢迎页 -->
+    <div id="welcome-screen" class="screen active">
+        <div class="welcome-content">
+            <h1>欢迎来到《雨桐×小繁》的年度甜蜜纪事</h1>
+            <button id="enter-button">进入</button>
+        </div>
+    </div>
+
+    <!-- 互动内容页 -->
+    <div id="interactive-screen" class="screen">
+        <!-- 时间轴互动 -->
+        <section id="timeline">
+            <h2>甜蜜时光</h2>
+            <ul>
+                <li data-date="2023-01-15" class="timeline-item">第一次叫雨桐的日子</li>
+                <li data-date="2023-03-20" class="timeline-item">第一次约会</li>
+                <!-- 添加更多日期 -->
+            </ul>
+            <div id="timeline-detail" class="hidden">
+                <p id="detail-text"></p>
+                <button id="close-detail">关闭</button>
+            </div>
+        </section>
+
+        <!-- 亲亲抱抱计数器 -->
+        <section id="counter">
+            <h2>亲亲抱抱计数器</h2>
+            <button id="kiss-button">亲亲/抱抱</button>
+            <p>亲亲次数：<span id="kiss-count">0</span></p>
+        </section>
+
+        <!-- 金句互动 -->
+        <section id="quotes">
+            <h2>年度金句</h2>
+            <button id="star-button">点击星星</button>
+            <p id="quote-display">点击上方星星显示金句</p>
+        </section>
+
+        <!-- 未来展望 -->
+        <section id="future">
+            <h2>未来展望</h2>
+            <input type="text" id="future-input" placeholder="写下对雨桐的期望" style="width: 80%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+            <button id="submit-future">提交</button>
+            <div id="future-animation" class="hidden">
+                <p id="future-text"></p>
+            </div>
+        </section>
+    </div>
+
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const interactiveScreen = document.getElementById('interactive-screen');
+            const enterButton = document.getElementById('enter-button');
+
+            // 切换到互动页面
+            enterButton.addEventListener('click', () => {
+                welcomeScreen.classList.remove('active');
+                interactiveScreen.classList.add('active');
+            });
+
+            // 时间轴互动
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const timelineDetail = document.getElementById('timeline-detail');
+            const detailText = document.getElementById('detail-text');
+            const closeDetail = document.getElementById('close-detail');
+
+            const timelineData = {
+                "2023-01-15": "那天小繁说‘雨桐’的时候，雨桐的心都暖化了。",
+                "2023-03-20": "第一次约会，我们一起去了海边，留下了美好的回忆。"
+                // 添加更多日期和内容
+            };
+
+            timelineItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const date = item.getAttribute('data-date');
+                    detailText.textContent = timelineData[date] || "暂无详细内容。";
+                    timelineDetail.classList.remove('hidden');
+                    gsap.from(timelineDetail, { duration: 1, opacity: 0, y: -50 });
+                });
+            });
+
+            closeDetail.addEventListener('click', () => {
+                timelineDetail.classList.add('hidden');
+            });
+
+            // 亲亲抱抱计数器
+            const kissButton = document.getElementById('kiss-button');
+            const kissCountDisplay = document.getElementById('kiss-count');
+            let kissCount = localStorage.getItem('kissCount') ? parseInt(localStorage.getItem('kissCount')) : 0;
+            kissCountDisplay.textContent = kissCount;
+
+            kissButton.addEventListener('click', () => {
+                kissCount++;
+                kissCountDisplay.textContent = kissCount;
+                localStorage.setItem('kissCount', kissCount);
+                // 播放动画
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerHTML = '❤️';
+                document.body.appendChild(heart);
+                gsap.to(heart, { y: -100, opacity: 0, duration: 2, onComplete: () => heart.remove() });
+            });
+
+            // 金句互动
+            const starButton = document.getElementById('star-button');
+            const quoteDisplay = document.getElementById('quote-display');
+
+            const quotes = [
+                "小繁是雨桐的唯一。",
+                "我们的爱如星辰般璀璨。",
+                "与你在一起，每天都是情人节。",
+                "雨桐，我的心永远属于你。"
+                // 添加更多金句
+            ];
+
+            starButton.addEventListener('click', () => {
+                const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                quoteDisplay.textContent = randomQuote;
+                // 添加简单动画
+                gsap.fromTo(quoteDisplay, { opacity: 0 }, { opacity: 1, duration: 1 });
+            });
+
+            // 未来展望
+            const futureInput = document.getElementById('future-input');
+            const submitFuture = document.getElementById('submit-future');
+            const futureAnimation = document.getElementById('future-animation');
+            const futureText = document.getElementById('future-text');
+
+            submitFuture.addEventListener('click', () => {
+                const inputText = futureInput.value.trim();
+                if (inputText === "") {
+                    alert("请输入你的期望！");
+                    return;
+                }
+                // 保存到本地存储
+                localStorage.setItem('futureExpectation', inputText);
+                // 显示动画
+                futureText.textContent = `2024年，我们一起创造更多甜蜜回忆！`;
+                futureAnimation.classList.remove('hidden');
+                gsap.fromTo(futureAnimation, { opacity: 0 }, { opacity: 1, duration: 2 });
+                // 清空输入框
+                futureInput.value = "";
+            });
+
+            // 如果之前有保存的未来展望，显示
+            const savedFuture = localStorage.getItem('futureExpectation');
+            if (savedFuture) {
+                futureText.textContent = `2024年，我们一起创造更多甜蜜回忆！`;
+                futureAnimation.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
